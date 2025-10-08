@@ -19,13 +19,15 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { type LocalCharacter } from '../types/character';
 import { getCharacterById } from '../services/api';
 
+export const CHARACTERS_STORAGE_KEY = 'starwars_characters';
+
 export const CharacterDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
   // Use useLocalStorage hook to manage stored characters
   const [storedCharacters, setStoredCharacters] = useLocalStorage<Record<string, LocalCharacter>>(
-    'starwars_characters',
+    CHARACTERS_STORAGE_KEY,
     {}
   );
   

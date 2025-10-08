@@ -19,6 +19,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import { type Character, type LocalCharacter } from '../types/character';
 import { getCharacters, extractIdFromUrl } from '../services/api';
+import { CHARACTERS_STORAGE_KEY } from './CharacterDetail';
 
 export const CharacterList = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export const CharacterList = () => {
   
   // Use useLocalStorage hook to access stored characters
   const [storedCharacters] = useLocalStorage<Record<string, LocalCharacter>>(
-    'starwars_characters',
+    CHARACTERS_STORAGE_KEY,
     {}
   );
   
