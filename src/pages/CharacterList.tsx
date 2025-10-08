@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import {
@@ -25,7 +25,6 @@ export const CharacterList = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Use useLocalStorage hook to access stored characters
   const [storedCharacters] = useLocalStorage<Record<string, LocalCharacter>>(
     CHARACTERS_STORAGE_KEY,
     {}
@@ -36,8 +35,9 @@ export const CharacterList = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
   
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const search = searchParams.get('search') || '';
+  // Memoize parsed URL params
+  const page = useMemo(() => parseInt(searchParams.get('page') || '1', 10), [searchParams]);
+  const search = useMemo(() => searchParams.get('search') || '', [searchParams]);
   const [searchInput, setSearchInput] = useState(search);
 
   useEffect(() => {

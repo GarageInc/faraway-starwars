@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import {
@@ -21,6 +21,17 @@ import { getCharacterById } from '../services/api';
 
 export const CHARACTERS_STORAGE_KEY = 'starwars_characters';
 
+const CHARACTER_FIELDS = [
+  { key: 'name' as const, label: 'Name' },
+  { key: 'birth_year' as const, label: 'Birth Year' },
+  { key: 'gender' as const, label: 'Gender' },
+  { key: 'height' as const, label: 'Height (cm)' },
+  { key: 'mass' as const, label: 'Mass (kg)' },
+  { key: 'hair_color' as const, label: 'Hair Color' },
+  { key: 'skin_color' as const, label: 'Skin Color' },
+  { key: 'eye_color' as const, label: 'Eye Color' },
+] as const;
+
 export const CharacterDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -38,6 +49,11 @@ export const CharacterDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const localCharacter = useMemo(() => 
+    id ? storedCharacters[id] : undefined,
+    [id, storedCharacters]
+  );
+
   useEffect(() => {
     const fetchCharacter = async () => {
       if (!id) {
@@ -50,14 +66,10 @@ export const CharacterDetail = () => {
       setError(null);
       
       try {
-        // First check if we have a locally stored version
-        const localCharacter = storedCharacters[id];
-        
         if (localCharacter) {
           setCharacter(localCharacter);
           setEditedCharacter(localCharacter);
         } else {
-          // Fetch from API if not in local storage
           const data = await getCharacterById(id);
           setCharacter(data);
           setEditedCharacter(data);
@@ -70,7 +82,7 @@ export const CharacterDetail = () => {
     };
 
     fetchCharacter();
-  }, [id, storedCharacters]);
+  }, [id, localCharacter]);
 
   const handleInputChange = (field: keyof LocalCharacter, value: string) => {
     if (!editedCharacter) return;
@@ -163,77 +175,17 @@ export const CharacterDetail = () => {
             gap: 3,
           }}
         >
-          <TextField
-            fullWidth
-            label="Name"
-            value={editedCharacter.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Birth Year"
-            value={editedCharacter.birth_year}
-            onChange={(e) => handleInputChange('birth_year', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Gender"
-            value={editedCharacter.gender}
-            onChange={(e) => handleInputChange('gender', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Height (cm)"
-            value={editedCharacter.height}
-            onChange={(e) => handleInputChange('height', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Mass (kg)"
-            value={editedCharacter.mass}
-            onChange={(e) => handleInputChange('mass', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Hair Color"
-            value={editedCharacter.hair_color}
-            onChange={(e) => handleInputChange('hair_color', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Skin Color"
-            value={editedCharacter.skin_color}
-            onChange={(e) => handleInputChange('skin_color', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
-
-          <TextField
-            fullWidth
-            label="Eye Color"
-            value={editedCharacter.eye_color}
-            onChange={(e) => handleInputChange('eye_color', e.target.value)}
-            disabled={!isEditing}
-            variant={isEditing ? 'outlined' : 'filled'}
-          />
+          {CHARACTER_FIELDS.map(({ key, label }) => (
+            <TextField
+              key={key}
+              fullWidth
+              label={label}
+              value={editedCharacter[key]}
+              onChange={(e) => handleInputChange(key, e.target.value)}
+              disabled={!isEditing}
+              variant={isEditing ? 'outlined' : 'filled'}
+            />
+          ))}
         </Box>
 
         <Box display="flex" gap={2} mt={4}>
