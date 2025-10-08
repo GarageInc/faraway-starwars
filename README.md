@@ -106,11 +106,12 @@ src/
 
 ### Local Storage
 
-All character edits are saved in the browser's localStorage under the key `starwars_characters`. This means:
+All character edits are saved in the browser's localStorage using the `useLocalStorage` hook from `usehooks-ts`. The data is stored under the key `starwars_characters`. This means:
 - Edits persist across page refreshes
 - No server requests for saving data
 - Each character's edited state is tracked
 - Original data can be fetched from API at any time
+- Reactive state management with automatic localStorage sync
 
 ## API Integration
 
