@@ -19,6 +19,7 @@ A modern Single Page Application built with React and TypeScript that displays S
 - **Vite** - Build tool and dev server
 - **Material-UI (MUI)** - UI component library
 - **React Router** - Client-side routing
+- **usehooks-ts** - React hooks library (useLocalStorage)
 - **Vitest** - Unit testing framework
 - **React Testing Library** - Component testing utilities
 

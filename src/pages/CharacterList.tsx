@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 import {
   Container,
   Card,
@@ -16,13 +17,18 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
-import { type Character } from '../types/character';
+import { type Character, type LocalCharacter } from '../types/character';
 import { getCharacters, extractIdFromUrl } from '../services/api';
-import { getAllCharacters } from '../services/storage';
 
 export const CharacterList = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Use useLocalStorage hook to access stored characters
+  const [storedCharacters] = useLocalStorage<Record<string, LocalCharacter>>(
+    'starwars_characters',
+    {}
+  );
   
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,8 +81,7 @@ export const CharacterList = () => {
 
   const isCharacterEdited = (character: Character): boolean => {
     const id = extractIdFromUrl(character.url);
-    const localCharacters = getAllCharacters();
-    return !!localCharacters[id];
+    return !!storedCharacters[id];
   };
 
   if (loading) {

@@ -3,10 +3,8 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { CharacterDetail } from '../CharacterDetail';
 import * as api from '../../services/api';
-import * as storage from '../../services/storage';
 
 vi.mock('../../services/api');
-vi.mock('../../services/storage');
 
 const mockCharacter = {
   name: 'Luke Skywalker',
@@ -27,7 +25,7 @@ const mockCharacter = {
   url: 'https://swapi.py4e.com/api/people/1/',
 };
 
-const renderWithRouter = (id: string = '1') => {
+const renderWithRouter = () => {
   return render(
     <BrowserRouter>
       <Routes>
@@ -41,6 +39,7 @@ const renderWithRouter = (id: string = '1') => {
 describe('CharacterDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     window.history.pushState({}, '', '/character/1');
   });
 
@@ -48,7 +47,6 @@ describe('CharacterDetail', () => {
     vi.spyOn(api, 'getCharacterById').mockImplementation(
       () => new Promise(() => {}) // Never resolves
     );
-    vi.spyOn(storage, 'getCharacter').mockReturnValue(null);
 
     renderWithRouter();
 
@@ -57,7 +55,6 @@ describe('CharacterDetail', () => {
 
   it('should render character details after loading', async () => {
     vi.spyOn(api, 'getCharacterById').mockResolvedValue(mockCharacter);
-    vi.spyOn(storage, 'getCharacter').mockReturnValue(null);
 
     renderWithRouter();
 
@@ -70,7 +67,6 @@ describe('CharacterDetail', () => {
 
   it('should enable editing when Edit button is clicked', async () => {
     vi.spyOn(api, 'getCharacterById').mockResolvedValue(mockCharacter);
-    vi.spyOn(storage, 'getCharacter').mockReturnValue(null);
 
     renderWithRouter();
 
@@ -89,7 +85,7 @@ describe('CharacterDetail', () => {
 
   it('should load from localStorage when available', async () => {
     const editedCharacter = { ...mockCharacter, name: 'Edited Name', isEdited: true };
-    vi.spyOn(storage, 'getCharacter').mockReturnValue(editedCharacter);
+    localStorage.setItem('starwars_characters', JSON.stringify({ '1': editedCharacter }));
 
     renderWithRouter();
 

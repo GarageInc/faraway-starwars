@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 import {
   Container,
   Paper,
@@ -17,11 +18,16 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { type LocalCharacter } from '../types/character';
 import { getCharacterById } from '../services/api';
-import { saveCharacter, getCharacter } from '../services/storage';
 
 export const CharacterDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  // Use useLocalStorage hook to manage stored characters
+  const [storedCharacters, setStoredCharacters] = useLocalStorage<Record<string, LocalCharacter>>(
+    'starwars_characters',
+    {}
+  );
   
   const [character, setCharacter] = useState<LocalCharacter | null>(null);
   const [editedCharacter, setEditedCharacter] = useState<LocalCharacter | null>(null);
@@ -43,7 +49,7 @@ export const CharacterDetail = () => {
       
       try {
         // First check if we have a locally stored version
-        const localCharacter = getCharacter(id);
+        const localCharacter = storedCharacters[id];
         
         if (localCharacter) {
           setCharacter(localCharacter);
@@ -62,7 +68,7 @@ export const CharacterDetail = () => {
     };
 
     fetchCharacter();
-  }, [id]);
+  }, [id, storedCharacters]);
 
   const handleInputChange = (field: keyof LocalCharacter, value: string) => {
     if (!editedCharacter) return;
@@ -76,8 +82,13 @@ export const CharacterDetail = () => {
   const handleSave = () => {
     if (!id || !editedCharacter) return;
     
-    saveCharacter(id, editedCharacter);
-    setCharacter(editedCharacter);
+    // Save to localStorage using the hook
+    setStoredCharacters({
+      ...storedCharacters,
+      [id]: { ...editedCharacter, isEdited: true },
+    });
+    
+    setCharacter({ ...editedCharacter, isEdited: true });
     setIsEditing(false);
     setSaveSuccess(true);
     
